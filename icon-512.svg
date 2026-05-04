@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192">
+  <circle cx="96" cy="96" r="96" fill="#1a4a2a"/>
+  <circle cx="96" cy="96" r="72" fill="white"/>
+  <circle cx="96" cy="96" r="72" fill="none" stroke="#1a4a2a" stroke-width="4"/>
+  <path d="M96 40 L112 60 L88 76 L72 56 Z" fill="#1a4a2a"/>
+  <path d="M136 68 L152 88 L136 108 L120 92 L128 68 Z" fill="#1a4a2a"/>
+  <path d="M56 68 L64 92 L48 108 L32 88 L48 68 Z" fill="#1a4a2a"/>
+  <path d="M88 112 L112 112 L118 140 L96 152 L74 140 Z" fill="#1a4a2a"/>
+  <text x="96" y="175" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">KUFC</text>
+</svg>
