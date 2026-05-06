@@ -87,6 +87,9 @@ README.md, CLAUDE.md, CHANGELOG.md
   - `POST { team, name, pin, day, touches, checkedTypes }` → `{ success, total, pct }`
 - New teams require the Apps Script + Sheet to support them — frontend changes
   alone won't make a team functional. Flag this when adding teams.
+- Full backend reference (Sheet tab schema, `TEAMS` config, deploy steps,
+  retired drill ids) lives in **`CLAUDECODE_GITHUB.md`**. Read that file when
+  the work crosses the frontend/backend boundary.
 
 ### Styling
 - Fonts: Barlow (body) and Barlow Condensed (headings/numbers).

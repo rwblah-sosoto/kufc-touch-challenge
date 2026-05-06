@@ -11,6 +11,13 @@ Newest entries at the top.
   contributors.
 - Expanded `README.md` covering the player flow, drill list, pages,
   architecture, and contributing rules.
+- Updated `CLAUDECODE_GITHUB.md` (uploaded by Ray) to reflect the new
+  drill list (465/day), the PST division, the `--pst` color token, and
+  added a "Backend Update — PST + New Drill List" section with concrete
+  Sheet/Apps Script steps (new `PST_*` tabs, `TEAMS` config diff, drill
+  id allowlist, `MAX_DAILY = 465`, redeploy instructions).
+- Cross-link from `CLAUDE.md` → `CLAUDECODE_GITHUB.md` so future agents
+  read the backend reference when work crosses the frontend/backend boundary.
 - **PST (Position Specific Training)** division alongside U11 and U12:
   - New team button on the submit page (`index.html`) with orange
     `#c0560a` color tokens (`--pst`, `.selected-pst`, `.team-name.pst`).
