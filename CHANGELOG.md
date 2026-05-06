@@ -5,6 +5,11 @@ Newest entries at the top.
 
 ## [2026-05-06]
 
+### Fixed
+- `index.html`: Changed "Log Another Player" button label to "Log Another Day" on the success screen.
+
+
+
 ### Added
 - `CHANGELOG.md` (this file) for per-change history.
 - `CLAUDE.md` documenting conventions and process expectations for AI
