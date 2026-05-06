@@ -38,7 +38,9 @@ pst-leaderboard.html    # PST (Position Specific Training) leaderboard
 sw.js                   # Service worker — bump CACHE name when HTML changes
 manifest.json           # PWA manifest
 icon-192.svg, icon-512.svg, kufc-logo.jpg, apex-logo.jpg
-README.md, CLAUDE.md, CHANGELOG.md
+apps-script/Code.gs     # Reference copy of the live Apps Script backend
+apps-script/README.md   # Deploy steps + sheet schema for the script
+README.md, CLAUDE.md, CHANGELOG.md, CLAUDECODE_GITHUB.md
 ```
 
 ## Conventions
@@ -90,6 +92,9 @@ README.md, CLAUDE.md, CHANGELOG.md
 - Full backend reference (Sheet tab schema, `TEAMS` config, deploy steps,
   retired drill ids) lives in **`CLAUDECODE_GITHUB.md`**. Read that file when
   the work crosses the frontend/backend boundary.
+- `apps-script/Code.gs` is a versioned reference copy of the live script.
+  After any deploy, paste the new code here and commit so the repo stays in
+  sync with what's running in production.
 
 ### Styling
 - Fonts: Barlow (body) and Barlow Condensed (headings/numbers).

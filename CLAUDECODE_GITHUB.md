@@ -205,9 +205,14 @@ Edit the `U11_Players` or `U12_Players` tab in Google Sheets. Changes take effec
 
 ## Backend Update — PST Division + New Drill List (2026-05)
 
-The frontend now sends `team: "PST"` and the new drill ids. Until the backend
-is updated, PST players can't load and their submissions will fail. Run
-through this checklist on the Sheet and Apps Script:
+A reference copy of the live script lives at `apps-script/Code.gs` in this
+repo (with deploy instructions in `apps-script/README.md`). Keep it in sync
+after every Apps Script change.
+
+The script as currently written is fully data-driven — it doesn't validate
+`checkedTypes` against an allowlist, doesn't enforce a `MAX_DAILY`, and
+doesn't compute drill totals server-side. So the only changes required for
+the new drills + PST are:
 
 ### 1. Google Sheet — add three PST tabs
 
@@ -221,43 +226,38 @@ rename. Schemas must match the U11/U12 versions exactly:
 - `PST_Total` — columns: `Player`, `Total Touches`, `Percentage`. Leave
   empty; rebuilt by `updateTotals(ss, "PST", players)`.
 
-### 2. Apps Script — add `PST` to the `TEAMS` config
+### 2. Apps Script — add `PST` to `TEAMS` and broaden the error string
+
+Two-line patch (full patched file at `apps-script/Code.gs`):
 
 ```javascript
+// in the TEAMS const
 const TEAMS = {
   U11: { players: "U11_Players", submissions: "U11_Submissions", totals: "U11_Total" },
   U12: { players: "U12_Players", submissions: "U12_Submissions", totals: "U12_Total" },
   PST: { players: "PST_Players", submissions: "PST_Submissions", totals: "PST_Total" }
 };
+
+// in doGet, replace the hardcoded "(U11 or U12)" message
+if (!team || !TEAMS[team]) return response({ success: false, error: "Please specify a valid team (" + Object.keys(TEAMS).join(", ") + ")" });
 ```
 
-That's the only change required if the rest of the script is data-driven off
-`TEAMS[team]`. If anywhere in the code you see `team === "U11" || team === "U12"`
-or a hardcoded `["U11","U12"]` allowlist, add `"PST"` (or replace with
-`Object.keys(TEAMS)`).
+No other code changes are needed:
 
-### 3. Drill-id allowlist (if present)
+- Drill-id allowlist: **N/A** — the script accepts whatever ids the client
+  sends and stores them as a comma-joined string in `Touch Types`. The new
+  ids (`pass_alt`, `wall_1t`, `bonus_pat`) flow through with no schema change.
+- `MAX_DAILY` / per-day-max: **N/A** — the script doesn't enforce one. Daily
+  totals are summed in `updateTotals` from the `Touches` column directly.
+- `bonus_pat = 65`: handled client-side; the script just stores the total.
+- Retired ids (`pass_str`, `pass_ang`, `pass_1t`) stay untouched in
+  historical `*_Submissions` rows — those rows still contribute to player
+  career totals as expected.
 
-If `doPost` validates `checkedTypes` against an allowlist, swap the passing
-ids to the new five:
+### 3. (Optional) Future hardening
 
-```javascript
-const VALID_TOUCH_IDS = new Set([
-  "rf_top","lf_top","alt_top",
-  "rf_ins","lf_ins","roll_pass",
-  "pass_htr","pass_htl","pass_alt","wall_1t","bonus_pat"
-]);
-```
-
-Don't strip the retired ids (`pass_str`, `pass_ang`, `pass_1t`) from the
-**Submissions** rows — historical totals depend on them. Just don't accept
-them on new POSTs.
-
-### 4. Daily-total / per-day-max (if hardcoded)
-
-If the script has a `MAX_DAILY = 450` or `500` constant for validation or for
-percentage math, change it to **465**. Better, derive it server-side from a
-drill-config object that mirrors the frontend:
+If you later want to stop trusting the client `touches` field, recompute
+server-side in `doPost` before the `appendRow`:
 
 ```javascript
 const DRILL_TOUCHES = {
@@ -265,22 +265,15 @@ const DRILL_TOUCHES = {
   rf_ins:25, lf_ins:25, roll_pass:50,
   pass_htr:50, pass_htl:50, pass_alt:50, wall_1t:50, bonus_pat:65
 };
-const MAX_DAILY = Object.values(DRILL_TOUCHES).reduce((a,b)=>a+b,0); // 465
+const validTouches = (checkedTypes||[])
+  .filter(id => DRILL_TOUCHES[id] != null)
+  .reduce((s,id) => s + DRILL_TOUCHES[id], 0);
+// then use validTouches instead of Number(touches) in the appendRow
 ```
 
-If the script trusts the client-sent `touches` total (which is the current
-contract per `CLAUDE.md`), no math changes are needed — but consider
-recomputing server-side from `checkedTypes` × `DRILL_TOUCHES` to harden
-against tampering.
+This isn't required for the PST/new-drills change — flag it only.
 
-### 5. Bonus drill scoring
-
-`bonus_pat` is worth **65** touches, not 50. Anywhere the script maps drill
-ids → counts, make sure `bonus_pat` is **65**.
-
-### 6. Re-deploy
-
-After editing the script:
+### 4. Re-deploy
 
 1. **Deploy → Manage deployments → ✏ pencil → Version → New version → Deploy.**
 2. Confirm the deployment URL is unchanged (same `SCRIPT_URL`).
