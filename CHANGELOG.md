@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file.
 Newest entries at the top.
 
+## [2026-05-07]
+
+### Changed
+- `apps-script/Code.gs`: wrapped `doGet` in `try/catch` (mirrors `doPost`)
+  and added explicit `Missing sheet tab: <name>` errors to `getPlayers`,
+  `getSubmittedDays`, `updateTotals`, and `doPost`. Without this, a
+  missing tab returned an HTML 500 page that the frontend masked as
+  "Could not connect. Please check your internet" — diagnosed today
+  when PST players failed to load before the `PST_*` tabs were added.
+  Now the frontend will surface "No players found for PST" and the
+  Apps Script execution log shows the exact missing-tab name.
+
 ## [2026-05-06]
 
 ### Added
@@ -11,6 +23,25 @@ Newest entries at the top.
   contributors.
 - Expanded `README.md` covering the player flow, drill list, pages,
   architecture, and contributing rules.
+- Updated `CLAUDECODE_GITHUB.md` (uploaded by Ray) to reflect the new
+  drill list (465/day), the PST division, the `--pst` color token, and
+  added a "Backend Update — PST + New Drill List" section with concrete
+  Sheet / Apps Script steps.
+- Cross-link from `CLAUDE.md` → `CLAUDECODE_GITHUB.md` so future agents
+  read the backend reference when work crosses the frontend/backend boundary.
+- `apps-script/Code.gs` — versioned reference copy of the live Apps Script
+  backend, with `PST` added to the `TEAMS` config and the `doGet` error
+  string broadened to list teams from `Object.keys(TEAMS)`.
+- `apps-script/README.md` — deploy steps and sheet schema for the script,
+  with the rule that this directory must be re-pasted after every Apps
+  Script deploy to keep the repo in sync.
+
+### Changed
+- Refined the "Backend Update" section of `CLAUDECODE_GITHUB.md` after
+  reading the actual `Code.gs`: the script doesn't validate `checkedTypes`
+  or enforce `MAX_DAILY`, so the only required edits are the `TEAMS`
+  addition and the error-message broadening. Optional server-side total
+  recompute is documented as a future hardening step, not a requirement.
 - **PST (Position Specific Training)** division alongside U11 and U12:
   - New team button on the submit page (`index.html`) with orange
     `#c0560a` color tokens (`--pst`, `.selected-pst`, `.team-name.pst`).

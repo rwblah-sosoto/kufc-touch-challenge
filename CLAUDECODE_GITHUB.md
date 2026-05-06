@@ -36,13 +36,17 @@ kufc-touch-challenge/
 ├── index.html              # Submit form (main page parents bookmark)
 ├── u11-leaderboard.html    # U11 live leaderboard
 ├── u12-leaderboard.html    # U12 live leaderboard
+├── pst-leaderboard.html    # PST live leaderboard
 ├── manifest.json           # PWA manifest
 ├── sw.js                   # Service worker
 ├── icon-192.svg            # PWA icon
 ├── icon-512.svg            # PWA icon
 ├── apex-logo.jpg           # APEX Surgical sponsor logo
 ├── kufc-logo.jpg           # KUFC crest
-└── README.md
+├── README.md               # Human-facing product docs
+├── CLAUDE.md               # Conventions for AI contributors
+├── CHANGELOG.md            # Per-change history
+└── CLAUDECODE_GITHUB.md    # This file (full backend + project context)
 ```
 
 ---
@@ -55,10 +59,13 @@ kufc-touch-challenge/
 ### Tabs:
 - `U11_Players` — Name, PIN, Initials (one row per U11 player)
 - `U12_Players` — Name, PIN, Initials (one row per U12 player)
+- `PST_Players` — Name, PIN, Initials (one row per PST player)
 - `U11_Submissions` — Timestamp, Player Name, Touches, PIN, Day, Touch Types
 - `U12_Submissions` — same structure
+- `PST_Submissions` — same structure
 - `U11_Total` — Player, Total Touches, Percentage (auto-calculated)
 - `U12_Total` — same structure
+- `PST_Total` — same structure
 
 ---
 
@@ -81,7 +88,8 @@ kufc-touch-challenge/
 ```javascript
 const TEAMS = {
   U11: { players: "U11_Players", submissions: "U11_Submissions", totals: "U11_Total" },
-  U12: { players: "U12_Players", submissions: "U12_Submissions", totals: "U12_Total" }
+  U12: { players: "U12_Players", submissions: "U12_Submissions", totals: "U12_Total" },
+  PST: { players: "PST_Players", submissions: "PST_Submissions", totals: "PST_Total" }
 };
 ```
 
@@ -98,23 +106,28 @@ const TEAMS = {
 
 ---
 
-## Touch Types (11 total, 450 touches = full day)
+## Touch Types (11 total, 465 touches = full day)
 
 ```javascript
 const TOUCH_TYPES = [
-  { id: 'rf_top',    name: 'Right Foot Top Surface Juggling',       touches: 25, group: 'instep'  },
-  { id: 'lf_top',    name: 'Left Foot Top Surface Juggling',        touches: 25, group: 'instep'  },
-  { id: 'alt_top',   name: 'Alternating Feet Top Surface Juggling', touches: 50, group: 'instep'  },
-  { id: 'rf_ins',    name: 'Right Foot Inside Surface Juggling',    touches: 25, group: 'inside'  },
-  { id: 'lf_ins',    name: 'Left Foot Inside Surface Juggling',     touches: 25, group: 'inside'  },
-  { id: 'roll_pass', name: 'Pass, Roll Pass',                       touches: 50, group: 'inside'  },
-  { id: 'pass_str',  name: 'Pass and Receive Straight',             touches: 50, group: 'passing' },
-  { id: 'pass_htr',  name: 'Pass and Receive Half Turn Right',      touches: 50, group: 'passing' },
-  { id: 'pass_htl',  name: 'Pass and Receive Half Turn Left',       touches: 50, group: 'passing' },
-  { id: 'pass_ang',  name: 'Pass and Receive on an Angle',          touches: 50, group: 'passing' },
-  { id: 'pass_1t',   name: 'Pass and Receive 1 Touch',              touches: 50, group: 'passing' },
+  { id: 'rf_top',    name: 'Right Foot Top Surface Juggling',                           touches: 25, group: 'instep'  },
+  { id: 'lf_top',    name: 'Left Foot Top Surface Juggling',                            touches: 25, group: 'instep'  },
+  { id: 'alt_top',   name: 'Alternating Feet Top Surface Juggling',                     touches: 50, group: 'instep'  },
+  { id: 'rf_ins',    name: 'Right Foot Inside Surface Juggling',                        touches: 25, group: 'inside'  },
+  { id: 'lf_ins',    name: 'Left Foot Inside Surface Juggling',                         touches: 25, group: 'inside'  },
+  { id: 'roll_pass', name: 'Pass, Roll Pass',                                           touches: 50, group: 'inside'  },
+  { id: 'pass_htr',  name: 'Pass and Receive Half Turn Right',                          touches: 50, group: 'passing' },
+  { id: 'pass_htl',  name: 'Pass and Receive Half Turn Left',                           touches: 50, group: 'passing' },
+  { id: 'pass_alt',  name: 'Pass and Receive Half Turn Alternating or Avoid Pressure',  touches: 50, group: 'passing' },
+  { id: 'wall_1t',   name: 'Alternating Wall 1 Touch',                                  touches: 50, group: 'passing' },
+  { id: 'bonus_pat', name: 'Bonus Touch Pattern',                                       touches: 65, group: 'passing' },
 ];
 ```
+
+### Retired drill ids (do not delete from historical sheet rows)
+- `pass_str` — Pass and Receive Straight
+- `pass_ang` — Pass and Receive on an Angle
+- `pass_1t`  — Pass and Receive 1 Touch
 
 ---
 
@@ -128,6 +141,7 @@ const TOUCH_TYPES = [
 --green-pale: #e8f5ee;   /* selected states background */
 --u11: #1a5a8a;          /* U11 blue */
 --u12: #7a2a5a;          /* U12 purple */
+--pst: #c0560a;          /* PST orange */
 --gold: #e8a020;         /* trophies, badges */
 --off-white: #f4f6f2;    /* page background */
 --text: #1a1f1a;
@@ -188,6 +202,83 @@ Edit the `U11_Players` or `U12_Players` tab in Google Sheets. Changes take effec
 5. The Total tab recalculates on next submission
 
 ---
+
+## Backend Update — PST Division + New Drill List (2026-05)
+
+A reference copy of the live script lives at `apps-script/Code.gs` in this
+repo (with deploy instructions in `apps-script/README.md`). Keep it in sync
+after every Apps Script change.
+
+The script as currently written is fully data-driven — it doesn't validate
+`checkedTypes` against an allowlist, doesn't enforce a `MAX_DAILY`, and
+doesn't compute drill totals server-side. So the only changes required for
+the new drills + PST are:
+
+### 1. Google Sheet — add three PST tabs
+
+In the **KUFC Touch Challenge** spreadsheet, duplicate the U12 tabs and
+rename. Schemas must match the U11/U12 versions exactly:
+
+- `PST_Players` — columns: `Name`, `PIN`, `Initials` (optional). One row
+  per PST player. Populate from the PST roster.
+- `PST_Submissions` — columns: `Timestamp`, `Player Name`, `Touches`,
+  `PIN`, `Day`, `Touch Types`. Leave empty; rows are appended by the script.
+- `PST_Total` — columns: `Player`, `Total Touches`, `Percentage`. Leave
+  empty; rebuilt by `updateTotals(ss, "PST", players)`.
+
+### 2. Apps Script — add `PST` to `TEAMS` and broaden the error string
+
+Two-line patch (full patched file at `apps-script/Code.gs`):
+
+```javascript
+// in the TEAMS const
+const TEAMS = {
+  U11: { players: "U11_Players", submissions: "U11_Submissions", totals: "U11_Total" },
+  U12: { players: "U12_Players", submissions: "U12_Submissions", totals: "U12_Total" },
+  PST: { players: "PST_Players", submissions: "PST_Submissions", totals: "PST_Total" }
+};
+
+// in doGet, replace the hardcoded "(U11 or U12)" message
+if (!team || !TEAMS[team]) return response({ success: false, error: "Please specify a valid team (" + Object.keys(TEAMS).join(", ") + ")" });
+```
+
+No other code changes are needed:
+
+- Drill-id allowlist: **N/A** — the script accepts whatever ids the client
+  sends and stores them as a comma-joined string in `Touch Types`. The new
+  ids (`pass_alt`, `wall_1t`, `bonus_pat`) flow through with no schema change.
+- `MAX_DAILY` / per-day-max: **N/A** — the script doesn't enforce one. Daily
+  totals are summed in `updateTotals` from the `Touches` column directly.
+- `bonus_pat = 65`: handled client-side; the script just stores the total.
+- Retired ids (`pass_str`, `pass_ang`, `pass_1t`) stay untouched in
+  historical `*_Submissions` rows — those rows still contribute to player
+  career totals as expected.
+
+### 3. (Optional) Future hardening
+
+If you later want to stop trusting the client `touches` field, recompute
+server-side in `doPost` before the `appendRow`:
+
+```javascript
+const DRILL_TOUCHES = {
+  rf_top:25, lf_top:25, alt_top:50,
+  rf_ins:25, lf_ins:25, roll_pass:50,
+  pass_htr:50, pass_htl:50, pass_alt:50, wall_1t:50, bonus_pat:65
+};
+const validTouches = (checkedTypes||[])
+  .filter(id => DRILL_TOUCHES[id] != null)
+  .reduce((s,id) => s + DRILL_TOUCHES[id], 0);
+// then use validTouches instead of Number(touches) in the appendRow
+```
+
+This isn't required for the PST/new-drills change — flag it only.
+
+### 4. Re-deploy
+
+1. **Deploy → Manage deployments → ✏ pencil → Version → New version → Deploy.**
+2. Confirm the deployment URL is unchanged (same `SCRIPT_URL`).
+3. Smoke-test: load `pst-leaderboard.html` (should show PST roster names or
+   empty state, not an error), then run a test submission for a PST player.
 
 ## Deployment Process
 
