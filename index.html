@@ -10,7 +10,7 @@
     --pitch: #1a4a2a; --pitch-mid: #245c35; --green: #1a7a4a; --green-light: #22a05e;
     --green-pale: #e8f5ee; --off-white: #f4f6f2; --text: #1a1f1a; --text-muted: #5a6a5a;
     --stripe: rgba(255,255,255,0.04); --error: #c0392b; --error-bg: #fdf0ef; --gold: #e8a020;
-    --u11: #1a5a8a; --u12: #7a2a5a;
+    --u11: #1a5a8a; --u12: #7a2a5a; --pst: #c0560a;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Barlow', sans-serif; background: var(--off-white); color: var(--text); min-height: 100vh; }
@@ -39,15 +39,17 @@
   .card-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
 
   /* TEAM SELECT */
-  .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .team-btn { border-radius: 12px; border: 2px solid #dde4dd; background: var(--off-white); padding: 24px 16px; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .team-btn { border-radius: 12px; border: 2px solid #dde4dd; background: var(--off-white); padding: 18px 8px; cursor: pointer; text-align: center; transition: all 0.15s; }
   .team-btn:hover { border-color: var(--green); background: var(--green-pale); }
   .team-btn.selected-u11 { border-color: var(--u11); background: #e8f0f8; }
   .team-btn.selected-u12 { border-color: var(--u12); background: #f5edf3; }
-  .team-icon { font-size: 36px; margin-bottom: 8px; }
-  .team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
+  .team-btn.selected-pst { border-color: var(--pst); background: #fbeede; }
+  .team-icon { font-size: 32px; margin-bottom: 6px; }
+  .team-name { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
   .team-name.u11 { color: var(--u11); }
   .team-name.u12 { color: var(--u12); }
+  .team-name.pst { color: var(--pst); }
   .team-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
   /* PLAYER GRID */
@@ -145,6 +147,7 @@
     <a href="/kufc-touch-challenge/" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.7);padding:12px 16px;text-decoration:none;white-space:nowrap;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">⚽ Submit Touches</a>
     <a href="/kufc-touch-challenge/u11-leaderboard.html" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.7);padding:12px 16px;text-decoration:none;white-space:nowrap;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">🏆 U11 Leaderboard</a>
     <a href="/kufc-touch-challenge/u12-leaderboard.html" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.7);padding:12px 16px;text-decoration:none;white-space:nowrap;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">🏆 U12 Leaderboard</a>
+    <a href="/kufc-touch-challenge/pst-leaderboard.html" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.7);padding:12px 16px;text-decoration:none;white-space:nowrap;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">🏆 PST Leaderboard</a>
     <a href="https://sites.google.com/compuray.ca/kufc-touch-challenge/instructional-videos" target="_blank" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:rgba(255,255,255,0.7);padding:12px 16px;text-decoration:none;white-space:nowrap;transition:color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">▶ Videos</a>
   </div>
 </nav>
@@ -196,6 +199,11 @@
           <div class="team-icon">🏆</div>
           <div class="team-name u12">U12</div>
           <div class="team-desc">Under 12</div>
+        </button>
+        <button class="team-btn" id="btn-pst" onclick="selectTeam('PST')">
+          <div class="team-icon">🎯</div>
+          <div class="team-name pst">PST</div>
+          <div class="team-desc">Position Specific Training</div>
         </button>
       </div>
     </div>
@@ -270,7 +278,7 @@
       <div class="total-bar">
         <div>
           <div class="total-label">Today's total</div>
-          <div class="total-max" id="total-max">0 of 500 touches</div>
+          <div class="total-max" id="total-max">0 touches</div>
         </div>
         <div style="text-align:right;">
           <div class="total-num" id="total-display">0</div>
@@ -321,11 +329,11 @@ const TOUCH_TYPES = [
   { id: "rf_ins",    name: "Right Foot Inside Surface Juggling",    touches: 25, group: "inside"  },
   { id: "lf_ins",    name: "Left Foot Inside Surface Juggling",     touches: 25, group: "inside"  },
   { id: "roll_pass", name: "Pass, Roll Pass",                       touches: 50, group: "inside"  },
-  { id: "pass_str",  name: "Pass and Receive Straight",             touches: 50, group: "passing" },
-  { id: "pass_htr",  name: "Pass and Receive Half Turn Right",      touches: 50, group: "passing" },
-  { id: "pass_htl",  name: "Pass and Receive Half Turn Left",       touches: 50, group: "passing" },
-  { id: "pass_ang",  name: "Pass and Receive on an Angle",          touches: 50, group: "passing" },
-  { id: "pass_1t",   name: "Pass and Receive 1 Touch",              touches: 50, group: "passing" },
+  { id: "pass_htr",  name: "Pass and Receive Half Turn Right",                         touches: 50, group: "passing" },
+  { id: "pass_htl",  name: "Pass and Receive Half Turn Left",                          touches: 50, group: "passing" },
+  { id: "pass_alt",  name: "Pass and Receive Half Turn Alternating or Avoid Pressure", touches: 50, group: "passing" },
+  { id: "wall_1t",   name: "Alternating Wall 1 Touch",                                 touches: 50, group: "passing" },
+  { id: "bonus_pat", name: "Bonus Touch Pattern",                                      touches: 65, group: "passing" },
 ];
 const MAX_DAILY = TOUCH_TYPES.reduce((s, t) => s + t.touches, 0);
 
@@ -343,10 +351,11 @@ async function selectTeam(team) {
 
   document.getElementById("btn-u11").className = "team-btn" + (team === "U11" ? " selected-u11" : "");
   document.getElementById("btn-u12").className = "team-btn" + (team === "U12" ? " selected-u12" : "");
+  document.getElementById("btn-pst").className = "team-btn" + (team === "PST" ? " selected-pst" : "");
 
   const badge = document.getElementById("hero-team-badge");
   badge.style.display = "inline-block";
-  badge.style.background = team === "U11" ? "#1a5a8a" : "#7a2a5a";
+  badge.style.background = team === "U11" ? "#1a5a8a" : team === "U12" ? "#7a2a5a" : "#c0560a";
   badge.style.color = "#fff";
   badge.textContent = team;
 
@@ -579,7 +588,7 @@ async function submitTouches() {
       document.getElementById("success-num").textContent = total.toLocaleString();
       document.getElementById("success-total").textContent = data.total.toLocaleString();
       document.getElementById("success-pct").textContent = data.pct + "%";
-      document.getElementById("success-msg").textContent = isFullDay ? `Full 500 touches for Day ${selectedDay}! You're ${data.pct}% of the way there.` : `Day ${selectedDay} logged. You're ${data.pct}% of the way to 25,000 touches.`;
+      document.getElementById("success-msg").textContent = isFullDay ? `Full ${MAX_DAILY} touches for Day ${selectedDay}! You're ${data.pct}% of the way there.` : `Day ${selectedDay} logged. You're ${data.pct}% of the way to 25,000 touches.`;
       setScreen(6);
     } else { alert("Error: " + (data.error || "Unknown error")); }
   } catch(err) { hideLoading(); alert("Could not connect. Please check your internet and try again."); }
@@ -602,6 +611,7 @@ function startOver() {
   selectedTeam = null; selectedIdx = -1; selectedDay = -1; checked = {};
   document.getElementById("btn-u11").className = "team-btn";
   document.getElementById("btn-u12").className = "team-btn";
+  document.getElementById("btn-pst").className = "team-btn";
   document.getElementById("hero-team-badge").style.display = "none";
   document.getElementById("btn-to-pin").disabled = true;
   clearPin();
