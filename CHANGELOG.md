@@ -7,6 +7,7 @@ Newest entries at the top.
 
 ### Fixed
 - `index.html`: Changed "Log Another Player" button label to "Log Another Day" on the success screen.
+- `sw.js`: Bumped cache to `kufc-v3` so PWA installs pick up the updated HTML.
 
 
 
