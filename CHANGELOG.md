@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file.
 Newest entries at the top.
 
+## [2026-05-07]
+
+### Changed
+- `apps-script/Code.gs`: wrapped `doGet` in `try/catch` (mirrors `doPost`)
+  and added explicit `Missing sheet tab: <name>` errors to `getPlayers`,
+  `getSubmittedDays`, `updateTotals`, and `doPost`. Without this, a
+  missing tab returned an HTML 500 page that the frontend masked as
+  "Could not connect. Please check your internet" — diagnosed today
+  when PST players failed to load before the `PST_*` tabs were added.
+  Now the frontend will surface "No players found for PST" and the
+  Apps Script execution log shows the exact missing-tab name.
+
 ## [2026-05-06]
 
 ### Added

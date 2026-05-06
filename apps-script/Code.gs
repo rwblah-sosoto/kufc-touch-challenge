@@ -7,6 +7,7 @@ const TEAMS = {
 
 function getPlayers(ss, team) {
   const sheet = ss.getSheetByName(TEAMS[team].players);
+  if (!sheet) throw new Error("Missing sheet tab: " + TEAMS[team].players);
   const rows = sheet.getDataRange().getValues().slice(1);
   return rows
     .filter(r => r[0] && r[1])
@@ -19,6 +20,7 @@ function getPlayers(ss, team) {
 
 function getSubmittedDays(ss, team, playerName) {
   const sheet = ss.getSheetByName(TEAMS[team].submissions);
+  if (!sheet) throw new Error("Missing sheet tab: " + TEAMS[team].submissions);
   const rows = sheet.getDataRange().getValues().slice(1);
   return rows
     .filter(r => String(r[1]).trim() === playerName && r[4] !== undefined && r[4] !== "")
@@ -47,10 +49,12 @@ function doPost(e) {
     }
 
     const sheet = ss.getSheetByName(TEAMS[team].submissions);
+    if (!sheet) throw new Error("Missing sheet tab: " + TEAMS[team].submissions);
     sheet.appendRow([new Date(), name, Number(touches), pin, Number(day), (checkedTypes||[]).join(",")]);
     updateTotals(ss, team, players);
 
     const totalsSheet = ss.getSheetByName(TEAMS[team].totals);
+    if (!totalsSheet) throw new Error("Missing sheet tab: " + TEAMS[team].totals);
     const totalsData = totalsSheet.getDataRange().getValues();
     const playerRow = totalsData.find(r => r[0] === name);
     const total = playerRow ? playerRow[1] : 0;
@@ -62,25 +66,31 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  const team = e.parameter.team;
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  if (!team || !TEAMS[team]) return response({ success: false, error: "Please specify a valid team (" + Object.keys(TEAMS).join(", ") + ")" });
+  try {
+    const team = e.parameter.team;
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!team || !TEAMS[team]) return response({ success: false, error: "Please specify a valid team (" + Object.keys(TEAMS).join(", ") + ")" });
 
-  const players = getPlayers(ss, team);
-  if (e.parameter.players === "1") return response({ players });
+    const players = getPlayers(ss, team);
+    if (e.parameter.players === "1") return response({ players });
 
-  updateTotals(ss, team, players);
-  const totalsSheet = ss.getSheetByName(TEAMS[team].totals);
-  const rows = totalsSheet.getDataRange().getValues().slice(1);
-  const playerData = rows.map(r => ({
-    name: r[0], total: r[1], pct: r[2],
-    initials: (players.find(pl => pl.name === r[0]) || {}).initials || ""
-  }));
-  return response({ players: playerData, team });
+    updateTotals(ss, team, players);
+    const totalsSheet = ss.getSheetByName(TEAMS[team].totals);
+    if (!totalsSheet) throw new Error("Missing sheet tab: " + TEAMS[team].totals);
+    const rows = totalsSheet.getDataRange().getValues().slice(1);
+    const playerData = rows.map(r => ({
+      name: r[0], total: r[1], pct: r[2],
+      initials: (players.find(pl => pl.name === r[0]) || {}).initials || ""
+    }));
+    return response({ players: playerData, team });
+  } catch(err) {
+    return response({ success: false, error: err.toString() });
+  }
 }
 
 function updateTotals(ss, team, players) {
   const sheet = ss.getSheetByName(TEAMS[team].submissions);
+  if (!sheet) throw new Error("Missing sheet tab: " + TEAMS[team].submissions);
   const data = sheet.getDataRange().getValues().slice(1);
   const totals = {};
   players.forEach(p => totals[p.name] = 0);
@@ -91,6 +101,7 @@ function updateTotals(ss, team, players) {
   });
 
   const totalsSheet = ss.getSheetByName(TEAMS[team].totals);
+  if (!totalsSheet) throw new Error("Missing sheet tab: " + TEAMS[team].totals);
   totalsSheet.clearContents();
   totalsSheet.appendRow(["Player", "Total Touches", "Percentage"]);
   players.forEach(p => {
