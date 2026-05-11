@@ -280,6 +280,16 @@ This isn't required for the PST/new-drills change — flag it only.
 3. Smoke-test: load `pst-leaderboard.html` (should show PST roster names or
    empty state, not an error), then run a test submission for a PST player.
 
+## Privacy Policy
+
+The privacy policy for the KUFC Touch Challenge App is hosted at:
+
+**https://rwblah-sosoto.github.io/kufc-touch-challenge/privacy_policy.html**
+
+Use this URL as the **App Store / Google Play privacy policy URL** when submitting the native app. The file lives at `privacy_policy.html` in the repo root and is served via GitHub Pages.
+
+---
+
 ## Deployment Process
 
 Any change to HTML files:

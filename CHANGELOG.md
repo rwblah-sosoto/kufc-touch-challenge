@@ -3,6 +3,19 @@
 All notable changes to this project are documented in this file.
 Newest entries at the top.
 
+## [2026-05-11]
+
+### Added
+- `privacy_policy.html` — privacy policy page for the KUFC Touch Challenge App,
+  hosted at https://rwblah-sosoto.github.io/kufc-touch-challenge/privacy_policy.html.
+  Use this URL as the App Store / Google Play privacy policy URL.
+- `CLAUDECODE_GITHUB.md`: added "Privacy Policy" section documenting the hosted
+  URL and its role as the App Store privacy policy link.
+
+### Changed
+- `sw.js`: added `privacy_policy.html` to the service-worker ASSETS list and
+  bumped cache name `kufc-v2` → `kufc-v3` so installed PWAs pick up the new file.
+
 ## [2026-05-07]
 
 ### Changed
